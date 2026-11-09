@@ -1,0 +1,54 @@
+#!/bin/sh
+# ASUS Z97 / i7-4770K / RX 570: післявстановлювальний сценарій пакета.
+# 1) macOS 26+: драйвер вбудованого звуку VoodooHDA в /Library/Extensions.
+# 2) OpenCore: ставиться на розділ EFI системного диска, лише якщо його там немає.
+LOG=/var/log/z97-drivers-install.log
+exec >>"$LOG" 2>&1
+echo "=== $(date) ціль=$3 ==="
+T="$3"; [ "$T" = "/" ] && T=""
+SRC="$T/Library/Application Support/Z97-Haswell-Drivers"
+STAMP=$(date +%Y-%m-%d_%H%M)
+
+# --- 1. звук
+DARWIN=$(uname -r | cut -d. -f1)
+if [ "$DARWIN" -ge 25 ]; then
+  LE="$T/Library/Extensions"
+  rm -rf "$LE/VoodooHDA.kext"
+  cp -R "$SRC/VoodooHDA.kext" "$LE/" && chown -R root:wheel "$LE/VoodooHDA.kext" && chmod -R 755 "$LE/VoodooHDA.kext"
+  touch "$LE"
+  echo "VoodooHDA встановлено в $LE"
+  # викликає запит дозволу в «Конфіденційність і безпека»
+  [ -z "$T" ] && /usr/bin/kmutil load -p /Library/Extensions/VoodooHDA.kext
+else
+  echo "macOS старіша за 26 (Darwin $DARWIN): звук дає AppleALC із завантажувача, VoodooHDA не ставиться"
+fi
+
+# --- 2. завантажувач
+ROOTDEV=$(diskutil info "${3:-/}" | awk -F': *' '/Part of Whole/{print $2}')
+STORE=$(diskutil info -plist "$ROOTDEV" | plutil -extract APFSPhysicalStores.0.APFSPhysicalStore raw - 2>/dev/null)
+[ -z "$STORE" ] && STORE="$ROOTDEV"
+WHOLE=$(echo "$STORE" | sed -E 's/s[0-9]+$//')
+ESP="${WHOLE}s1"
+FS=$(diskutil info "$ESP" | awk -F': *' '/File System Personality/{print $2}')
+echo "системний диск $WHOLE, розділ завантажувача $ESP ($FS)"
+case "$FS" in
+  *FAT*) ;;
+  *) echo "розділ $ESP не FAT — завантажувач не чіпаю"; exit 0 ;;
+esac
+MP=$(diskutil info "$ESP" | awk -F': *' '/Mount Point/{print $2}')
+WASMOUNTED=1
+if [ -z "$MP" ]; then WASMOUNTED=0; diskutil mount "$ESP"; MP=$(diskutil info "$ESP" | awk -F': *' '/Mount Point/{print $2}'); fi
+if [ -z "$MP" ] || [ ! -d "$MP" ]; then echo "не вдалося підключити $ESP — завантажувач не чіпаю"; exit 0; fi
+if [ ! -f "$MP/EFI/OC/OpenCore.efi" ]; then
+  [ -d "$MP/EFI" ] && mv "$MP/EFI" "$MP/EFI_before_pkg_$STAMP"
+  cp -R "$SRC/EFI" "$MP/" && echo "завантажувач встановлено на $ESP"
+elif cmp -s "$MP/EFI/OC/config.plist" "$SRC/EFI/OC/config.plist"; then
+  echo "на $ESP уже такий самий завантажувач — без змін"
+else
+  rm -rf "$MP/EFI_from_pkg"
+  cp -R "$SRC/EFI" "$MP/EFI_from_pkg" && echo "на $ESP інший завантажувач — не замінюю; версія з пакета поруч у EFI_from_pkg"
+fi
+find "$MP" -maxdepth 4 -name "._*" -delete 2>/dev/null
+sync
+[ "$WASMOUNTED" = 0 ] && diskutil unmount "$ESP"
+exit 0
