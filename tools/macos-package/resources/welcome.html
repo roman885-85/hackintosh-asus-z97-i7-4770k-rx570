@@ -1,0 +1,11 @@
+<html><head><meta charset="utf-8"><style>body{font-family:system-ui,-apple-system,Helvetica;font-size:13px}</style></head><body>
+<h2>Драйвери для ASUS Z97 · Core i7-4770K · Radeon RX 570 (macOS)</h2>
+<p>Пакет ставиться вже після встановлення macOS на комп'ютер, що завантажується через OpenCore з цього репозиторію.</p>
+<ul>
+<li><b>Вбудований звук (VoodooHDA 3.6.8)</b> — лише на macOS 26 і новіших: Apple прибрала AppleHDA, тож звук плати (Realtek ALC887) дає VoodooHDA.
+На macOS 15 і старіших нічого не ставиться — там звук дає AppleALC із завантажувача.</li>
+<li><b>Завантажувач OpenCore</b> — є лише в пакеті, зібраному з ключем <code>--with-efi</code>: ставить OpenCore на розділ EFI системного диска,
+якщо його там немає. Завантажувач із заглушками серійних номерів не ставиться.</li>
+</ul>
+<p>Журнал встановлення: <code>/var/log/z97-drivers-install.log</code>.</p>
+</body></html>

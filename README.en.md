@@ -104,14 +104,36 @@ and the separate AMD HDMI audio personality removed so HDMI stays with the syste
 
 **3. SMBIOS.** Tahoe does not support `iMacPro1,1`; `MacPro7,1` is used here.
 
-## Installer package
+## Driver package
 
-`tools/macos-package/build.sh` builds `dist/Z97-Haswell-Drivers-DATE.pkg`, which after a clean macOS install:
-- on macOS 26+ installs VoodooHDA and triggers the approval prompt;
-- installs OpenCore to the EFI partition of the system disk **only if it is not there yet**
-  (an identical one is left alone; a different one is not replaced — the package copy goes next to it as `EFI_from_pkg`).
+A ready package is in [Releases](https://github.com/roman885-85/hackintosh-asus-z97-i7-4770k-rx570/releases/latest):
+`Z97-Haswell-Drivers-DATE.pkg`. Install it **after** macOS is installed.
 
-Log: `/var/log/z97-drivers-install.log`. Approving the extension and restarting is always up to the user.
+**What it does.** On macOS 26 and newer it installs VoodooHDA 3.6.8 into `/Library/Extensions` (onboard Realtek ALC887 audio)
+and triggers the approval prompt. On macOS 15 and older it installs nothing — AppleALC from the EFI handles audio there.
+
+**How to install:**
+1. Download the `.pkg` from Releases.
+2. The package is not signed with an Apple certificate, so macOS won't open it with a double-click. Use any of these:
+   - remove the download flag and open it as usual:
+     ```bash
+     xattr -d com.apple.quarantine ~/Downloads/Z97-Haswell-Drivers-*.pkg
+     ```
+   - or System Settings → Privacy & Security → "Open Anyway" after the first attempt;
+   - or install from Terminal without the GUI:
+     ```bash
+     sudo installer -pkg ~/Downloads/Z97-Haswell-Drivers-*.pkg -target /
+     ```
+3. Go through the installer steps.
+4. System Settings → Privacy & Security → "Allow" next to the VoodooHDA system software.
+5. Restart — "Realtek ALC887" devices appear in System Settings → Sound.
+
+Log: `/var/log/z97-drivers-install.log`.
+
+**Your own package with the bootloader.** Put your serials into `EFI/OC/config.plist` and run
+`./tools/macos-package/build.sh --with-efi`. That package also installs OpenCore to the EFI partition of the system disk
+**only if it is not there yet** (an identical one is left alone; a different one is not replaced — the copy goes to `EFI_from_pkg`).
+With placeholder serials, `--with-efi` refuses to build, and the package itself won't install a placeholder bootloader.
 
 ## Known quirks
 
@@ -121,6 +143,7 @@ Log: `/var/log/z97-drivers-install.log`. Approving the extension and restarting 
 
 ## Changelog
 
+- **2026-11-10** — a ready driver package in Releases (VoodooHDA for macOS 26) with step-by-step instructions; build with selectable items and a `--with-efi` flag.
 - **2026-10-12** — USB map with macOS 26 keys; removed the unnecessary XHCI-unsupported (8CB1 is supported natively);
   `layout-id` stored as data; AppleALC limited to macOS 15; VoodooHDA for Tahoe.
 - **2026-10-11** — OpenCore 1.0.3 → 1.0.8, all kexts updated, `iMacPro1,1` → `MacPro7,1`;

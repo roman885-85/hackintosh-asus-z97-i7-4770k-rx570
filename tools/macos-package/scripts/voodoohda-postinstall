@@ -1,0 +1,23 @@
+#!/bin/sh
+# ASUS Z97 / i7-4770K / RX 570: вбудований звук (Realtek ALC887) на macOS 26+ — VoodooHDA у /Library/Extensions.
+LOG=/var/log/z97-drivers-install.log
+exec >>"$LOG" 2>&1
+echo "=== $(date) ціль=$3 ==="
+T="$3"; [ "$T" = "/" ] && T=""
+SRC="$T/Library/Application Support/Z97-Haswell-Drivers"
+STAMP=$(date +%Y-%m-%d_%H%M)
+
+# --- 1. звук
+DARWIN=$(uname -r | cut -d. -f1)
+if [ "$DARWIN" -ge 25 ]; then
+  LE="$T/Library/Extensions"
+  rm -rf "$LE/VoodooHDA.kext"
+  cp -R "$SRC/VoodooHDA.kext" "$LE/" && chown -R root:wheel "$LE/VoodooHDA.kext" && chmod -R 755 "$LE/VoodooHDA.kext"
+  touch "$LE"
+  echo "VoodooHDA встановлено в $LE"
+  # викликає запит дозволу в «Конфіденційність і безпека»
+  [ -z "$T" ] && /usr/bin/kmutil load -p /Library/Extensions/VoodooHDA.kext
+else
+  echo "macOS старіша за 26 (Darwin $DARWIN): звук дає AppleALC із завантажувача, VoodooHDA не ставиться"
+fi
+exit 0

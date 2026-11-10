@@ -1,7 +1,5 @@
 #!/bin/sh
-# ASUS Z97 / i7-4770K / RX 570: післявстановлювальний сценарій пакета.
-# 1) macOS 26+: драйвер вбудованого звуку VoodooHDA в /Library/Extensions.
-# 2) OpenCore: ставиться на розділ EFI системного диска, лише якщо його там немає.
+# ASUS Z97 / i7-4770K / RX 570: OpenCore на розділ EFI системного диска, лише якщо його там немає.
 LOG=/var/log/z97-drivers-install.log
 exec >>"$LOG" 2>&1
 echo "=== $(date) ціль=$3 ==="
@@ -9,20 +7,10 @@ T="$3"; [ "$T" = "/" ] && T=""
 SRC="$T/Library/Application Support/Z97-Haswell-Drivers"
 STAMP=$(date +%Y-%m-%d_%H%M)
 
-# --- 1. звук
-DARWIN=$(uname -r | cut -d. -f1)
-if [ "$DARWIN" -ge 25 ]; then
-  LE="$T/Library/Extensions"
-  rm -rf "$LE/VoodooHDA.kext"
-  cp -R "$SRC/VoodooHDA.kext" "$LE/" && chown -R root:wheel "$LE/VoodooHDA.kext" && chmod -R 755 "$LE/VoodooHDA.kext"
-  touch "$LE"
-  echo "VoodooHDA встановлено в $LE"
-  # викликає запит дозволу в «Конфіденційність і безпека»
-  [ -z "$T" ] && /usr/bin/kmutil load -p /Library/Extensions/VoodooHDA.kext
-else
-  echo "macOS старіша за 26 (Darwin $DARWIN): звук дає AppleALC із завантажувача, VoodooHDA не ставиться"
+# Публічний config.plist містить заглушки серійних номерів — такий завантажувач не ставимо.
+if grep -q "W00000000001" "$SRC/EFI/OC/config.plist" 2>/dev/null; then
+  echo "у config.plist заглушки серійних номерів — завантажувач не ставлю (впишіть свої й зберіть пакет build.sh --with-efi)"; exit 0
 fi
-
 # --- 2. завантажувач
 ROOTDEV=$(diskutil info "${3:-/}" | awk -F': *' '/Part of Whole/{print $2}')
 STORE=$(diskutil info -plist "$ROOTDEV" | plutil -extract APFSPhysicalStores.0.APFSPhysicalStore raw - 2>/dev/null)
