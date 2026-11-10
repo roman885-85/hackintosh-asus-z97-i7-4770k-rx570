@@ -20,12 +20,12 @@ SMBIOS is **MacPro7,1**, so both **macOS Sequoia 15** and **macOS Tahoe 26** run
 
 | Component | Model | Status |
 |---|---|---|
-| Motherboard | ASUS, Intel Z97 chipset (LGA1150, 9-series) | — |
+| Motherboard | ASUS, Intel Z97 chipset (LPC 8086:8CC4, LGA1150) | — |
 | CPU | Intel Core i7-4770K (Haswell, 4 cores / 8 threads) | ✅ XCPM, `plugin-type` via SSDT-PLUG |
-| RAM | 16 GB DDR3 | ✅ |
-| GPU | AMD Radeon RX 570, 4 GB (Polaris) | ✅ Metal, three displays at once |
+| RAM | 2 × 8 GB DDR3-1600 (TeamGroup UD3) | ✅ |
+| GPU | ASUS Radeon RX 570, 4 GB (Polaris, 1002:67DF) | ✅ Metal, hardware video decoding (Tahoe), three displays: a 1920×1200 projector and two 1920×1080 monitors |
 | iGPU | Intel HD 4600 | not used |
-| NVMe | Patriot P300 256 GB (PCIe 3.0 x2) | ✅ NVMeFix, TRIM |
+| NVMe | Patriot P300 256 GB (PCIe x2, 5 GT/s) | ✅ NVMeFix, TRIM |
 | SATA | Hitachi HTS545050A7E380 500 GB | ✅ |
 | Ethernet | Realtek RTL8111G, 1 Gbit/s | ✅ RealtekRTL8111 3.0.0 (EEE disabled) |
 | Onboard audio | Realtek ALC887 | ✅ macOS ≤ 15 — AppleALC, layout-id 52; macOS 26 — VoodooHDA |

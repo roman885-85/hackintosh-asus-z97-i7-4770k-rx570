@@ -20,12 +20,12 @@
 
 | Компонент | Модель | Стан |
 |---|---|---|
-| Плата | ASUS на чипсеті Intel Z97 (LGA1150, 9-та серія) | — |
+| Плата | ASUS на чипсеті Intel Z97 (LPC 8086:8CC4, LGA1150) | — |
 | Процесор | Intel Core i7-4770K (Haswell, 4 ядра / 8 потоків) | ✅ XCPM, `plugin-type` через SSDT-PLUG |
-| Пам'ять | 16 ГБ DDR3 | ✅ |
-| Відеокарта | AMD Radeon RX 570, 4 ГБ (Polaris) | ✅ Metal, три монітори одночасно |
+| Пам'ять | 2 × 8 ГБ DDR3-1600 (TeamGroup UD3) | ✅ |
+| Відеокарта | ASUS Radeon RX 570, 4 ГБ (Polaris, 1002:67DF) | ✅ Metal, апаратне декодування відео (Tahoe), три монітори: проєктор 1920×1200 і два 1920×1080 |
 | Вбудована графіка | Intel HD 4600 | не використовується |
-| NVMe | Patriot P300 256 ГБ (PCIe 3.0 x2) | ✅ NVMeFix, TRIM |
+| NVMe | Patriot P300 256 ГБ (PCIe x2, 5 GT/s) | ✅ NVMeFix, TRIM |
 | SATA | Hitachi HTS545050A7E380 500 ГБ | ✅ |
 | Мережа | Realtek RTL8111G, 1 Гбіт/с | ✅ RealtekRTL8111 3.0.0 (EEE вимкнено) |
 | Звук на платі | Realtek ALC887 | ✅ macOS ≤ 15 — AppleALC, layout-id 52; macOS 26 — VoodooHDA |
